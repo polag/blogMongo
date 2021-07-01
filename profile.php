@@ -1,8 +1,13 @@
 <?php
 include_once __DIR__ . '/includes/globals.php';
 include_once __DIR__.'/includes/User.php';
+if(isset($_GET['userId'])){
+    $user = \DataHandle\User::selectUser($_GET['userId']);
 
-$user = \DataHandle\User::selectUser($_SESSION['userId']);
+}else{
+    $user = \DataHandle\User::selectUser($_SESSION['userId']);
+}
+
 
 if(isset($_GET['edit'])):?>
     <div class="edit-profile">
@@ -66,13 +71,17 @@ if(isset($_GET['edit'])):?>
     <p>Email: <?php echo $user['email'];?></p>
     <p>Phone: <?php echo $user['phone'];?></p>
     <p class="user-bio"><?php echo $user['bio'];?></p>
+    <?php if(!isset($_GET['userId'])): ?>
     <a href="/blog/profile.php?edit=1"><i class="far fa-edit"></i></a>
+    <?php endif;?>
 </div>
+<?php if(!isset($_GET['userId'])): ?>
 <div class="user-buttons">
     <a href="/blog/profile.php?password=1" class="btn btn-dark">Change Password</a>
     <a href="/blog/includes/manage-profile.php?delete=1" class="btn btn-dark">Delete account</a>
 
 </div>
+<?php endif;?>
 <?php endif; ?>
 
 </body>

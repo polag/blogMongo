@@ -14,7 +14,7 @@ class Comment{
         global $mysqli;
         
        
-            $query = $mysqli->query('SELECT comment.id, comment.content, user.username, user.image, comment.date 
+            $query = $mysqli->query('SELECT comment.id, comment.content, user.username, user.image, comment.date, comment.user_id 
                 FROM comment 
                 JOIN user ON comment.user_id = user.id 
                 JOIN post ON comment.post_id = post.id

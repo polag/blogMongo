@@ -9,8 +9,8 @@ require_once __DIR__ . '/includes/util.php';
         <h1>Log In</h1>
         <?php
 
-        if (isset($_GET['stato'])) {
-            \DataHandle\Utils\show_alert('login', $_GET['stato']);
+        if (isset($_GET['statologin'])) {
+            \DataHandle\Utils\show_alert('login', $_GET['statologin']);
         }
         ?>
         <form action="includes/login.php" method="POST" class="container">
@@ -31,8 +31,8 @@ require_once __DIR__ . '/includes/util.php';
     <div class="col-6">
         <h1>Sign Up</h1>
         <?php
-        if (isset($_GET['stato'])) {
-            \DataHandle\Utils\show_alert('registration', $_GET['stato']);
+        if (isset($_GET['statoreg'])) {
+            \DataHandle\Utils\show_alert('registration', $_GET['statoreg']);
         }
         ?>
         <form action="includes/registration.php" method="POST" class="container">

@@ -4,6 +4,7 @@ include_once __DIR__ . '/includes/FormHandle.php';
 include_once __DIR__ . '/includes/Posts.php';
 
 $posts = \DataHandle\Posts::selectPost();
+if(count($posts)>0):
 ?>
 
 <div class="post-container">
@@ -30,6 +31,13 @@ $posts = \DataHandle\Posts::selectPost();
 
         <?php endforeach; ?>
     </div>
+    </div>
+    <?php else: ?>
+        
+        <p>There aren't any posts yet. Do you wish to <a href="/blog/create-post.php">create one?</a></p>
+
+
+    <?php endif; ?>
     </main>
 
     </body>

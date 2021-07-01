@@ -10,5 +10,10 @@ if (isset($_GET['update'])) {
     elseif($_GET['delete'] == 2){
         \DataHandle\Posts::deletePost($_SESSION['userId']);
     }
-}
+ } elseif(isset($_GET['publish'])){
+        
+        \DataHandle\Posts::publishPost($_GET['publish'],$_GET['id'],$_SESSION['userId']);
+    }
+
+
  

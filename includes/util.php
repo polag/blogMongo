@@ -5,7 +5,7 @@ namespace DataHandle\Utils;
 function show_alert($action_type, $state)
 {
     if ($state === 'ko') {
-      echo '<div class="alert alert-danger" role="alert">Ops! C\'è stato un problema, riprova più tardi.</div>';
+      echo '<div class="alert alert-danger" role="alert">Please try again later.</div>';
       return false;
     }
 
@@ -19,12 +19,10 @@ function show_alert($action_type, $state)
     }
 
     if($state === 'ok'){
-      if($action_type = 'Registration'){
-
+      if(($action_type == 'registration')||($action_type == 'login')) {
+        echo '<div class="alert alert-success" role="alert">'.ucfirst($action_type).' succesfull!</div>';
       }
-      elseif($action_type = 'Login'){
-        
-      }else{
+     else{
         echo '<div class="alert alert-success" role="alert">Your post has been succesfully '.strtolower($action_type).'</div>';
 
       }

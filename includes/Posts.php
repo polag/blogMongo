@@ -27,7 +27,7 @@ class Posts extends FormHandle
 
         );
 
-        
+
         if ($fields) {
             global $mysqli;
 
@@ -47,7 +47,6 @@ class Posts extends FormHandle
             header('Location: https://localhost/blog/create-post.php?stato=ok');
             exit;
         }
-        var_dump($fields);
     }
 
     public static function selectPost($id = null, $userId = null)
@@ -60,7 +59,7 @@ class Posts extends FormHandle
                 FROM post JOIN user ON post.author_id = user.id WHERE post.id =' . $id);
             $results = $query->fetch_assoc();
         } elseif ($userId and !$id) {
-            $query = $mysqli->query('SELECT post.id, title, content, summary, post.image,  created_at,updated_at, published_at, username 
+            $query = $mysqli->query('SELECT post.id, title, content, summary, post.image,  created_at,updated_at, published_at, username, published 
             FROM post JOIN user ON post.author_id = user.id WHERE user.id =' . $userId);
             $results = array();
 
@@ -162,37 +161,56 @@ class Posts extends FormHandle
                     exit;
                 }
             }
-                $stato = $is_in_error ? 'ko' : 'ok';
-                header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=' . $stato . '&delete=1');
-                exit;
-        }else {
-                try {
-                    $query = $mysqli->prepare('DELETE FROM post WHERE author_id = ?');
-                    if (is_bool($query)) {
-                        $is_in_error = true;
-                        throw new Exception('Query non valida. $mysqli->prepare ha restituito false.');
-                    }
-
-                    $query->bind_param('i', $userId);
-                    $query->execute();
-                } catch (Exception $e) {
-                    error_log("Errore PHP in linea {$e->getLine()}: " . $e->getMessage() . "\n", 3, 'my-errors.log');
-                }
-
-                if (count($query->error_list) > 0) {
+            $stato = $is_in_error ? 'ko' : 'ok';
+            header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=' . $stato . '&delete=1');
+            exit;
+        } else {
+            try {
+                $query = $mysqli->prepare('DELETE FROM post WHERE author_id = ?');
+                if (is_bool($query)) {
                     $is_in_error = true;
-                    foreach ($query->error_list as $error) {
-                        error_log("Errore MySQL n. {$error['errno']}: {$error['error']} \n", 3, 'my-errors.log');
-                    }
-                    header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=ko');
-                    exit;
+                    throw new Exception('Query non valida. $mysqli->prepare ha restituito false.');
                 }
-            
+
+                $query->bind_param('i', $userId);
+                $query->execute();
+            } catch (Exception $e) {
+                error_log("Errore PHP in linea {$e->getLine()}: " . $e->getMessage() . "\n", 3, 'my-errors.log');
+            }
+
+            if (count($query->error_list) > 0) {
+                $is_in_error = true;
+                foreach ($query->error_list as $error) {
+                    error_log("Errore MySQL n. {$error['errno']}: {$error['error']} \n", 3, 'my-errors.log');
+                }
+                header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=ko');
+                exit;
+            }
+
 
             $stato = $is_in_error ? 'ko' : 'ok';
             header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=' . $stato . '&delete=1');
             exit;
         }
-        
+    }
+    public static function publishPost($publish, $id, $userId)
+    {
+        global $mysqli;
+        $publish          = intval($publish);
+        $id          = intval($id);
+        $userId          = intval($userId);
+        $query = $mysqli->prepare('UPDATE post SET published = ? WHERE id = ? AND author_id = ? ');
+        $query->bind_param('iii', $publish, $id, $userId);
+        $query->execute();
+
+        if ($query->affected_rows === 0) {
+            error_log('Errore MySQL: ' . $query->error_list[0]['error']);
+            header('Location: https://localhost/blog/manage-post.php?stato=ko');
+            exit;
+        }
+
+
+        header('Location: https://localhost/blog/manage-post.php?stato=ok&publish='.$publish);
+        exit;
     }
 }

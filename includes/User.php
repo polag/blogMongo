@@ -57,6 +57,8 @@ class User
         );
 
         $fields = self::sanitize($fields);
+         $avatarId = rand(1,50);
+        $image = 'https://robohash.org/'.$avatarId; 
 
         if ($fields[0] instanceof Exception) {
             $error_messages = '';
@@ -66,12 +68,12 @@ class User
                     $error_messages .= '|';
                 }
             }
-            header('Location: https://localhost/blog/login.php?stato=errore&messages='
+            header('Location: https://localhost/blog/login.php?statoreg=errore&messages='
                 . $error_messages);
             exit;
         }
         if ($fields['password'] !== $fields['password-check']) {
-            header('Location: https://localhost/blog/login?stato=errore&messages=Passwords are different');
+            header('Location: https://localhost/blog/login?statoreg=errore&messages=Passwords are different');
             exit;
         }
 
@@ -80,7 +82,7 @@ class User
         $query_user = $mysqli->query("SELECT username FROM user WHERE username = '" . $fields['username'] . "'");
 
         if ($query_user->num_rows > 0) {
-            header('Location: https://localhost/blog/login.php?stato=errore&messages=Username already in use');
+            header('Location: https://localhost/blog/login.php?statoreg=errore&messages=Username already in use');
             exit;
         }
         $query_user->close();
@@ -88,23 +90,23 @@ class User
         $query_email = $mysqli->query("SELECT email FROM user WHERE email = '" . $fields['email'] . "'");
 
         if ($query_email->num_rows > 0) {
-            header('Location: https://localhost/blog/login.php?stato=errore&messages=Email already registered. Do you want to <a href="/blog/login.php"> LOG IN </a> instead?');
+            header('Location: https://localhost/blog/login.php?statoreg=errore&messages=Email already registered. Do you want to <a href="/blog/login.php"> LOG IN </a> instead?');
             exit;
         }
 
         $query_email->close();
 
-        $query = $mysqli->prepare('INSERT INTO user(username, firstname, lastname, email, phone, password) VALUES (?, ?,?,?,?,MD5(?))');
-        $query->bind_param('ssssss', $fields['username'], $fields['firstname'], $fields['lastname'], $fields['email'], $fields['phone'], $fields['password']);
+        $query = $mysqli->prepare('INSERT INTO user(username, firstname, lastname, email, phone, password, image) VALUES (?, ?,?,?,?,MD5(?),?)');
+        $query->bind_param('sssssss', $fields['username'], $fields['firstname'], $fields['lastname'], $fields['email'], $fields['phone'], $fields['password'],$image);
         $query->execute();
 
         if ($query->affected_rows === 0) {
             error_log('Error MySQL: ' . $query->error_list[0]['error']);
-            header('Location: https://localhost/blog/login.php?stato=ko');
+            header('Location: https://localhost/blog/login.php?statoreg=ko');
             exit;
         }
 
-        header('Location: https://localhost/blog/login.php?stato=ok');
+        header('Location: https://localhost/blog/login.php?statoreg=ok');
         exit;
     }
 
@@ -122,14 +124,14 @@ class User
 
         $query_user = $mysqli->query("SELECT * FROM user WHERE username = '" . $fields['username'] . "'");
         if ($query_user->num_rows === 0) {
-            header("Location: https://localhost/blog/login.php?stato=errore&messages=User doesn't exist");
+            header("Location: https://localhost/blog/login.php?statologin=errore&messages=User doesn't exist");
             exit;
         }
 
         $user = $query_user->fetch_assoc();
 
         if ($user['password'] !== md5($fields['password'])) {
-            header('Location: https://localhost/blog/login.php?stato=errore&messages=Wrong password');
+            header('Location: https://localhost/blog/login.php?statologin=errore&messages=Wrong password');
             exit;
         }
 

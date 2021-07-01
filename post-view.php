@@ -63,7 +63,7 @@ $quantity = \DataHandle\Comment::countComments($id)['quantity'];
             <?php foreach ($comments as $comment) : ?>
                 <div class="row comments">
                     <div class="col-1">
-                        <h3 class="comment-author"><?php echo $comment['username'] ?></h3>
+                        <a href="/blog/profile.php?userId=<?php echo $comment['user_id']; ?>" class="comment-author"><?php echo $comment['username']; ?></a>
                         <img class="comment-img" src="<?php echo $comment['image'] ?>" alt="user">
                     </div>
                     <div class="col-4">
