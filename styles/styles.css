@@ -1,0 +1,37 @@
+body{
+    text-align: center;
+    color: black;
+    font-size: 15px;
+}
+
+a{
+    text-decoration: none;
+    color: black;
+}
+
+
+.item-container{
+    border: grey solid 1px;
+    width: 75%;
+    text-align: center;
+    margin: 50px auto;
+    padding: 25px;
+}
+.post-title {
+    text-transform: capitalize;
+    font-size:2rem;
+    padding: 10px;
+}
+
+.post-author{
+    font-size: 1rem;
+   
+}
+.post-img{
+    max-width: 250px;
+    padding: 20px;
+}
+.post-summary{
+    font-size: 1.3rem;
+    padding: 20px;
+}
