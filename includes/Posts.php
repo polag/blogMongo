@@ -56,7 +56,7 @@ class Posts extends FormHandle
         global $mysqli;
 
         if ($id and !$userId) {
-            $query = $mysqli->query('SELECT title, content, summary, post.image, created_at, username 
+            $query = $mysqli->query('SELECT title, content, summary, post.image, created_at, username, user.image as avatar, user.bio
                 FROM post JOIN user ON post.author_id = user.id WHERE post.id =' . $id);
             $results = $query->fetch_assoc();
         } elseif ($userId and !$id) {
@@ -73,7 +73,7 @@ class Posts extends FormHandle
             FROM post JOIN user ON post.author_id = user.id WHERE user.id =' . $userId . ' AND post.id = ' . $id);
             $results = $query->fetch_assoc();
         } else {
-            $query = $mysqli->query('SELECT post.id, title, content, summary, post.image, created_at, username 
+            $query = $mysqli->query('SELECT post.id, title, content, summary, post.image, created_at, username, post.author_id 
                 FROM post JOIN user ON post.author_id = user.id WHERE published = 1');
 
 

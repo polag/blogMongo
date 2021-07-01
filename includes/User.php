@@ -1,7 +1,8 @@
 <?php
+
 namespace DataHandle;
 
-require_once __DIR__.'/db.php';
+require_once __DIR__ . '/db.php';
 
 use \DataHandle\Utils\InputSanitize;
 use Mysqli;
@@ -13,33 +14,33 @@ class User
     public static function sanitize($fields)
     {
         $errors        = array();
-        $fields['username'] = self::cleanInput($fields['username']); 
-        $fields['firstname'] = self::cleanInput($fields['firstname']); 
-        $fields['lastname'] = self::cleanInput($fields['lastname']); 
+        $fields['username'] = self::cleanInput($fields['username']);
+        $fields['firstname'] = self::cleanInput($fields['firstname']);
+        $fields['lastname'] = self::cleanInput($fields['lastname']);
         // Sanificare numero di telefono e verificarne la validità
         $fields['phone'] = self::cleanInput($fields['phone']);
         if (self::isPhoneNumberValid($fields['phone']) === 0) {
             $errors[] = new Exception('Phone number not valid.');
         }
 
-        
-         // Sanificare email e verificarne la validità
-         if (isset($fields['email']) && $fields['email'] !== '') {
+
+        // Sanificare email e verificarne la validità
+        if (isset($fields['email']) && $fields['email'] !== '') {
             $fields['email'] = self::cleanInput($fields['email']);
             if (!self::isEmailAddressValid($fields['email'])) {
                 $errors[] = new Exception('E-mail address not valid.');
             }
-        } 
+        }
 
-        
+
 
         if (count($errors) > 0) {
             return $errors;
         }
 
-        return $fields;  
+        return $fields;
     }
-    
+
 
 
     public static function registerUser($form_data)
@@ -65,21 +66,21 @@ class User
                     $error_messages .= '|';
                 }
             }
-            header('Location: https://localhost/blog/registration.php?stato=errore&messages='
+            header('Location: https://localhost/blog/login.php?stato=errore&messages='
                 . $error_messages);
             exit;
         }
         if ($fields['password'] !== $fields['password-check']) {
-            header('Location: https://localhost/blog/registration?stato=errore&messages=Passwords are different');
+            header('Location: https://localhost/blog/login?stato=errore&messages=Passwords are different');
             exit;
         }
-        
+
         global $mysqli;
         //check if username already exists
         $query_user = $mysqli->query("SELECT username FROM user WHERE username = '" . $fields['username'] . "'");
 
         if ($query_user->num_rows > 0) {
-            header('Location: https://localhost/blog/registration.php?stato=errore&messages=Username already in use');
+            header('Location: https://localhost/blog/login.php?stato=errore&messages=Username already in use');
             exit;
         }
         $query_user->close();
@@ -87,19 +88,19 @@ class User
         $query_email = $mysqli->query("SELECT email FROM user WHERE email = '" . $fields['email'] . "'");
 
         if ($query_email->num_rows > 0) {
-            header('Location: https://localhost/blog/registration.php?stato=errore&messages=Email already registered. Do you want to <a href="/blog/login.php"> LOG IN </a> instead?');
+            header('Location: https://localhost/blog/login.php?stato=errore&messages=Email already registered. Do you want to <a href="/blog/login.php"> LOG IN </a> instead?');
             exit;
         }
-        
+
         $query_email->close();
-    
+
         $query = $mysqli->prepare('INSERT INTO user(username, firstname, lastname, email, phone, password) VALUES (?, ?,?,?,?,MD5(?))');
-        $query->bind_param('ssssss', $fields['username'],$fields['firstname'],$fields['lastname'],$fields['email'],$fields['phone'], $fields['password']);
+        $query->bind_param('ssssss', $fields['username'], $fields['firstname'], $fields['lastname'], $fields['email'], $fields['phone'], $fields['password']);
         $query->execute();
 
         if ($query->affected_rows === 0) {
             error_log('Error MySQL: ' . $query->error_list[0]['error']);
-            header('Location: https://localhost/blog/registration.php?stato=ko');
+            header('Location: https://localhost/blog/login.php?stato=ko');
             exit;
         }
 
@@ -115,7 +116,7 @@ class User
             'password'  => $form_data['password']
         );
 
-        
+
 
         global $mysqli;
 
@@ -142,18 +143,18 @@ class User
     {
         global $mysqli;
         $userId = intval($userId);
-        $query = $mysqli->prepare('DELETE FROM utenti WHERE id = ?');
+        $query = $mysqli->prepare('DELETE FROM user WHERE id = ?');
         $query->bind_param('i', $userId);
         $query->execute();
-        
+
         if ($query->affected_rows > 0) {
             session_destroy();
             unset($_SESSION['username']);
-            header('Location: https://localhost/rubrica-paula/login.php?logout=1');
-            exit; 
+            header('Location: https://localhost/blog/login.php?logout=1');
+            exit;
         } else {
             //var_dump($query);
-            header('Location: https://localhost/rubrica-paula/admin.php=stato=ko');
+            header('Location: https://localhost/blog/profile.php=stato=ko');
             exit;
         }
     }
@@ -162,10 +163,54 @@ class User
     {
         global $mysqli;
 
-        $query_user = $mysqli->query("SELECT * FROM user WHERE id = ". $userId );
+        $query_user = $mysqli->query("SELECT * FROM user WHERE id = " . $userId);
         $user = $query_user->fetch_assoc();
         return $user;
     }
+    public static function updateUser($form_data, $userId)
+    {
 
-    
+        $fields = array(
+            'username'        => $form_data['username'],
+            'firstname'        => $form_data['firstname'],
+            'lastname'        => $form_data['lastname'],
+            'phone'        => $form_data['phone'],
+            'email'        => $form_data['email'],
+            'image'        => $form_data['image'],
+            'bio'        => $form_data['bio'],
+        );
+
+        if ($fields) {
+            global $mysqli;
+            $query = $mysqli->prepare('UPDATE user SET username = ?, firstname = ?, lastname = ?, phone = ?, email = ?, image = ?, bio = ? WHERE id = ? ');
+
+            $query->bind_param('sssssssi', $fields['username'], $fields['firstname'], $fields['lastname'], $fields['phone'], $fields['email'], $fields['image'], $fields['bio'], $userId);
+            $query->execute();
+
+
+            if ($query->affected_rows > 0) {
+                header('Location: https://localhost/blog/profile.php?id=' . $userId . '&stato=ok');
+                exit;
+            } else {
+                header('Location: https://localhost/blog/profile.php?id=' . $userId . '&stato=ko');
+                exit;
+            }
+        }
+    }
+    public static function updatePassword($password, $newPassword, $userId){
+        global $mysqli;
+            $query = $mysqli->prepare('UPDATE user SET password = ? WHERE id = ? AND password = ?');
+
+            $query->bind_param('sis', md5($newPassword), $userId, md5($password));
+            $query->execute();
+
+
+            if ($query->affected_rows > 0) {
+                header('Location: https://localhost/blog/profile.php?id=' . $userId . '&stato=ok');
+                exit;
+            } else {
+                header('Location: https://localhost/blog/profile.php?id=' . $userId . '&stato=ko&message=Incorrect Password');
+                exit;
+            }
+    }
 }

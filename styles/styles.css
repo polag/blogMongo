@@ -3,12 +3,31 @@ body{
     color: black;
     font-size: 15px;
 }
+h1{
+    margin-bottom: 30px;
+}
 
 a{
     text-decoration: none;
     color: black;
 }
+.post-card{
+    width: 18rem;
+}
+.author{
+    width: 45%;
+    padding: 10px;
+}
+.access{
+width: 75%;
+margin: 20px auto;
+text-align: justify;
 
+}
+.access input{
+    margin-bottom: 15px;
+    margin-top: 5px;
+}
 /* Posts */
 .item-container{
     border: grey solid 1px;
@@ -26,22 +45,23 @@ a{
 
 
 .post-title {
-    text-transform: capitalize;
-    font-size:2rem;
-    padding: 10px;
+    font-size:1.5rem;
 }
 
 .post-author{
     font-size: 1rem;
    
 }
+
 .post-img{
-    max-width: 250px;
+    max-width:100%;
     padding: 20px;
 }
+.preview-img{
+    max-height: 400px;
+}
 .post-summary{
-    font-size: 1.3rem;
-    padding: 20px;
+    font-size: 1rem;
 }
 
 .post-create{
@@ -55,7 +75,22 @@ a{
     max-width: 150px;
     border-radius: 50%;
 }
-
+.user-bio{
+    font-size: 1.5rem;
+    font-style: italic;
+}
+.edit-profile{
+        text-align: left;
+        width: 75%;
+        margin: auto;  
+}
+.user-profile{
+    width: 75%;
+    margin: auto;
+}
+.user-buttons{
+    margin-top: 50px;
+}
 
 /*Comments*/
 .comment-container h3{
@@ -64,6 +99,12 @@ a{
 
 .comment-container{
     padding-top: 50px;
+}
+.comments{
+    padding-top: 20px;
+}
+.comment-content{
+    padding-top: 40px;
 }
 
 .comment-img{

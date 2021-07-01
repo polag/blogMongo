@@ -19,7 +19,15 @@ function show_alert($action_type, $state)
     }
 
     if($state === 'ok'){
-      echo '<div class="alert alert-success" role="alert">Your post has been succesfully '.strtolower($action_type).'</div>';
+      if($action_type = 'Registration'){
+
+      }
+      elseif($action_type = 'Login'){
+        
+      }else{
+        echo '<div class="alert alert-success" role="alert">Your post has been succesfully '.strtolower($action_type).'</div>';
+
+      }
     }
 
     

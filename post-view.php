@@ -1,73 +1,89 @@
 <?php
 include_once __DIR__ . '/includes/globals.php';
 include_once __DIR__ . '/includes/Comment.php';
-$id=$_GET['id'];
+$id = $_GET['id'];
 $comment = $_GET['comment'];
 $post = \DataHandle\Posts::selectPost($id);
-$comments=array();
+$comments = array();
 $comments = \DataHandle\Comment::selectComments($id);
 $quantity = \DataHandle\Comment::countComments($id)['quantity'];
-
 ?>
 
 <div class="post-container">
 
     <div class="post-box">
-        
-        <h2 class="post-title"><?php echo $post['title']?></h2>
-    <div class="row">
-        <div class="col-8">
-            <p class="post-content"><?php echo $post['content']?></p>
-        </div>
-        <div class="col-4">
-            <img class="post-img" src="<?php echo $post['image']?>" alt="post">
-        </div>
-        
-        
-    </div>
-       
-        
-        <h4 class="post-author">Author: <?php echo $post['username']?></h4>
-        <p class="post-date">Created on: <?php echo $post['created_at']?></p>
 
-    
+        <h2 class="post-title"><?php echo $post['title'] ?></h2>
+        <div class="row">
+            <div class="col-8">
+                <p class="post-content"><?php echo $post['content'] ?></p>
+            </div>
+            <div class="col-4">
+                <img class="post-img" src="<?php echo $post['image'] ?>" alt="post">
+            </div>
+
+
+        </div>
+        <p class="post-date">Created on: <?php echo date('d M Y', strtotime($post['created_at'])) ?></p>
+
+
+
+        <div class="card author">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img class="user-img" src="<?php echo $post['avatar'] ?>" alt="avatar">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h4 class="post-author">Author: <?php echo $post['username'] ?></h4>
+                        <p class="card-text"><?php echo $post['bio']; ?></p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
     </div>
     <div class="comment-container">
-    <?php if($comment): ?>
-        <h3>Leave a comment:</h3>
-            <form action="./includes/create-comment.php?id=<?php echo $id;?>" method="POST">
-                <input type="text" name="comment" id="comment">
-                <input type="submit" class="btn btn-dark" value="Comment">
+        <?php if ($comment) : ?>
+            <h3>Leave a comment:</h3>
+            <form action="./includes/create-comment.php?id=<?php echo $id; ?>" method="POST">
+                <div class="input-group mb-3">
+                    <input type="text" name="comment" class="form-control" placeholder="Comment" aria-label="comment" id="comment" aria-describedby="comment" required>
+                    <input type="submit" class="btn btn-outline-secondary" id="comment" value="Comment">
+                </div>
+
             </form>
         <?php endif; ?>
-            <?php if(count($comments)>0): ?>
-                <h3 class="comment-quantity">This post has <?php echo $quantity?> comment<?php if(count($comments)>1): echo's';endif; ?>.</h3>
-            
-                <?php foreach($comments as $comment): ?>
-                 <div class="row">
-                     <div class="col-2">
-                        <h3 class="comment-author"><?php echo $comment['username']?></h3>
-                        <img class="comment-img" src="<?php echo $comment['image']?>" alt="user">
-                     </div>
-                     <div class="col-4">
-                        <p class="comment-content"><?php echo $comment['content']?></p>
+        <?php if (count($comments) > 0) : ?>
+            <p class="comment-quantity">This post has <?php echo $quantity ?> comment<?php if (count($comments) > 1) : echo 's';
+                                                                                    endif; ?>.</p>
 
-                     </div>
-                   
+            <?php foreach ($comments as $comment) : ?>
+                <div class="row comments">
+                    <div class="col-1">
+                        <h3 class="comment-author"><?php echo $comment['username'] ?></h3>
+                        <img class="comment-img" src="<?php echo $comment['image'] ?>" alt="user">
+                    </div>
+                    <div class="col-4">
+                        <p class="comment-content"><?php echo $comment['content'] ?></p>
 
-                 </div>   
-                
-                <?php  endforeach; ?>
-                <?php  endif ?>
-        
-    
+                    </div>
+
+
+                </div>
+
+            <?php endforeach; ?>
+        <?php endif ?>
+
+
     </div>
-    
 
-</div> 
+
+</div>
 </main>
 
 </body>
 
-</html> 
+</html>

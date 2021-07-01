@@ -42,7 +42,7 @@ session_start();
                                 <?php echo strtoupper($_SESSION['username'])  ?>
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="./profile.php">Profile</a></li>
+                            <li><a class="dropdown-item" href="/blog/profile.php">Profile</a></li>
                                 <li><a class="dropdown-item" href="/blog/manage-post.php">Manage posts</a></li><!-- Vista para ver, editar y eliminar posts -->
                                 <li><a class="dropdown-item" href="/blog/create-post.php">Create new post</a></li>
 
@@ -56,7 +56,7 @@ session_start();
                                 <a class="nav-link" href="/blog/login.php">Log In</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/blog/registration.php">Sign Up</a>
+                                <a class="nav-link" href="/blog/login.php">Sign Up</a>
                             </li>
                         <?php endif ?>
 
