@@ -7,6 +7,7 @@ $posts = \DataHandle\Posts::selectPost();
 ?>
 
 <div class="post-container">
+    <h1>ALL POSTS</h1>
 <?php foreach($posts as $post): ?>
     <div class="item-container">
         <a href="/blog/post-view.php?id=<?php echo $post['id']?>&comment=1">

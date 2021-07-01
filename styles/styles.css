@@ -9,7 +9,7 @@ a{
     color: black;
 }
 
-
+/* Posts */
 .item-container{
     border: grey solid 1px;
     width: 75%;
@@ -17,6 +17,14 @@ a{
     margin: 50px auto;
     padding: 25px;
 }
+
+.post-container{
+    width: 75%;
+    text-align: justify;
+    margin: auto;
+}
+
+
 .post-title {
     text-transform: capitalize;
     font-size:2rem;
@@ -34,4 +42,30 @@ a{
 .post-summary{
     font-size: 1.3rem;
     padding: 20px;
+}
+
+.post-create{
+    text-align: left;
+    width: 75%;
+    margin: auto;
+}
+
+/* User profile */
+.user-img {
+    max-width: 150px;
+    border-radius: 50%;
+}
+
+
+/*Comments*/
+.comment-container h3{
+    font-size: 18px;
+}
+
+.comment-container{
+    padding-top: 50px;
+}
+
+.comment-img{
+    width: 45px;
 }

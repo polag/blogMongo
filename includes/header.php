@@ -43,20 +43,20 @@ session_start();
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="./profile.php">Profile</a></li>
-                                <li><a class="dropdown-item" href="./manage-post.php">Manage posts</a></li><!-- Vista para ver, editar y eliminar posts -->
+                                <li><a class="dropdown-item" href="/blog/manage-post.php">Manage posts</a></li><!-- Vista para ver, editar y eliminar posts -->
                                 <li><a class="dropdown-item" href="/blog/create-post.php">Create new post</a></li>
 
-                                <li><a class="dropdown-item" href="./includes/login.php?logout=1">Log out</a></li>
+                                <li><a class="dropdown-item" href="/blog/includes/login.php?logout=1">Log out</a></li>
                             </ul>
 
 
                            
                         <?php else : ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="./login.php">Log In</a>
+                                <a class="nav-link" href="/blog/login.php">Log In</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="./registration.php">Sign Up</a>
+                                <a class="nav-link" href="/blog/registration.php">Sign Up</a>
                             </li>
                         <?php endif ?>
 

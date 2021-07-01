@@ -10,6 +10,38 @@ use Exception;
 class User
 {
     use \DataHandle\Utils\InputSanitize;
+    public static function sanitize($fields)
+    {
+        $errors        = array();
+        $fields['username'] = self::cleanInput($fields['username']); 
+        $fields['firstname'] = self::cleanInput($fields['firstname']); 
+        $fields['lastname'] = self::cleanInput($fields['lastname']); 
+        // Sanificare numero di telefono e verificarne la validità
+        $fields['phone'] = self::cleanInput($fields['phone']);
+        if (self::isPhoneNumberValid($fields['phone']) === 0) {
+            $errors[] = new Exception('Phone number not valid.');
+        }
+
+        
+         // Sanificare email e verificarne la validità
+         if (isset($fields['email']) && $fields['email'] !== '') {
+            $fields['email'] = self::cleanInput($fields['email']);
+            if (!self::isEmailAddressValid($fields['email'])) {
+                $errors[] = new Exception('E-mail address not valid.');
+            }
+        } 
+
+        
+
+        if (count($errors) > 0) {
+            return $errors;
+        }
+
+        return $fields;  
+    }
+    
+
+
     public static function registerUser($form_data)
     {
 
@@ -24,32 +56,43 @@ class User
         );
 
         $fields = self::sanitize($fields);
-        //verificar email y numero de telefono
-        if ($fields['password'] !== $fields['password-check']) {
-            header('Location: https://localhost/blog/registration?stato=errore&messages=Le password non corrispondono');
+
+        if ($fields[0] instanceof Exception) {
+            $error_messages = '';
+            foreach ($fields as $key => $error) {
+                $error_messages .= $error->getMessage();
+                if ($key < count($fields) - 1) {
+                    $error_messages .= '|';
+                }
+            }
+            header('Location: https://localhost/blog/registration.php?stato=errore&messages='
+                . $error_messages);
             exit;
         }
-        if (self::isPhoneNumberValid($fields['phone']) === 0) {
-            $errors[] = new Exception('Numero di telefono non valido.');
+        if ($fields['password'] !== $fields['password-check']) {
+            header('Location: https://localhost/blog/registration?stato=errore&messages=Passwords are different');
+            exit;
         }
-        if (isset($fields['email']) && $fields['email'] !== '') {
-            $fields['email'] = self::cleanInput($fields['email']);
-            if (!self::isEmailAddressValid($fields['email'])) {
-                $errors[] = new Exception('Indirizzo email non valido.');
-            }
-        }
-
+        
         global $mysqli;
-
+        //check if username already exists
         $query_user = $mysqli->query("SELECT username FROM user WHERE username = '" . $fields['username'] . "'");
 
         if ($query_user->num_rows > 0) {
-            header('Location: https://localhost/blog/registration.php?stato=errore&messages=Usernamegià preso');
+            header('Location: https://localhost/blog/registration.php?stato=errore&messages=Username already in use');
             exit;
         }
-
         $query_user->close();
-    //Insert todos los datos de registro
+        //check if email already registered
+        $query_email = $mysqli->query("SELECT email FROM user WHERE email = '" . $fields['email'] . "'");
+
+        if ($query_email->num_rows > 0) {
+            header('Location: https://localhost/blog/registration.php?stato=errore&messages=Email already registered. Do you want to <a href="/blog/login.php"> LOG IN </a> instead?');
+            exit;
+        }
+        
+        $query_email->close();
+    
         $query = $mysqli->prepare('INSERT INTO user(username, firstname, lastname, email, phone, password) VALUES (?, ?,?,?,?,MD5(?))');
         $query->bind_param('ssssss', $fields['username'],$fields['firstname'],$fields['lastname'],$fields['email'],$fields['phone'], $fields['password']);
         $query->execute();
@@ -72,12 +115,11 @@ class User
             'password'  => $form_data['password']
         );
 
-        $fields = self::sanitize($fields);
+        
 
         global $mysqli;
 
         $query_user = $mysqli->query("SELECT * FROM user WHERE username = '" . $fields['username'] . "'");
-
         if ($query_user->num_rows === 0) {
             header("Location: https://localhost/blog/login.php?stato=errore&messages=User doesn't exist");
             exit;
@@ -116,10 +158,14 @@ class User
         }
     }
 
-    protected static function sanitize($fields)
+    public static function selectUser($userId)
     {
-        $fields['username'] = self::cleanInput($fields['username']);
+        global $mysqli;
 
-        return $fields;
+        $query_user = $mysqli->query("SELECT * FROM user WHERE id = ". $userId );
+        $user = $query_user->fetch_assoc();
+        return $user;
     }
+
+    
 }

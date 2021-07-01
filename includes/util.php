@@ -19,16 +19,10 @@ function show_alert($action_type, $state)
     }
 
     if($state === 'ok'){
-      echo '<div class="alert alert-success" role="alert">Your post has been succesfully'.$action_type.'</div>';
+      echo '<div class="alert alert-success" role="alert">Your post has been succesfully '.strtolower($action_type).'</div>';
     }
 
-    /* if ($action_type === 'cancellazione' && $state === 'ok') {
-      echo '<div class="alert alert-success" role="alert">Contatto eliminato con successo.</div>';
-    } elseif ($action_type === 'modifica' && $state === 'ok') {
-      echo '<div class="alert alert-success" role="alert">Contatto aggiornato con successo.</div>';
-    } elseif ($action_type === 'inserimento' && $state === 'ok') {
-      echo '<div class="alert alert-success" role="alert">Contatto inserito con successo.</div>';
-    } */
+    
 }
 
 trait InputSanitize
