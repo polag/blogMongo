@@ -15,13 +15,14 @@ $quantity = \DataHandle\Comment::countComments($id)['quantity'];
 
         <h2 class="post-title"><?php echo $post['title'] ?></h2>
         <div class="row">
-            <div class="col-8">
+            <div class="col-lg-8 col-md-12 col-sm-12">
                 <p class="post-content"><?php echo $post['content'] ?></p>
             </div>
-            <div class="col-4">
-                <img class="post-img" src="<?php echo $post['image'] ?>" alt="post">
-            </div>
-
+            <?php if ($post['image'] != null) :  ?>
+                <div class="col-lg-4 col-md-12 col-sm-12">
+                    <img class="post-img" src="<?php echo $post['image'] ?>" alt="post">
+                </div>
+            <?php endif; ?>
 
         </div>
         <p class="post-date">Created on: <?php echo date('d M Y', strtotime($post['created_at'])) ?></p>
@@ -30,10 +31,10 @@ $quantity = \DataHandle\Comment::countComments($id)['quantity'];
 
         <div class="card author">
             <div class="row g-0">
-                <div class="col-md-4">
+                <div class="col-lg-4 col-md-8 col-sm-12">
                     <img class="user-img" src="<?php echo $post['avatar'] ?>" alt="avatar">
                 </div>
-                <div class="col-md-8">
+                <div class="col-lg-8 col-md-8 col-sm-12">
                     <div class="card-body">
                         <h4 class="post-author">Author: <?php echo $post['username'] ?></h4>
                         <p class="card-text"><?php echo $post['bio']; ?></p>
@@ -58,29 +59,25 @@ $quantity = \DataHandle\Comment::countComments($id)['quantity'];
         <?php endif; ?>
         <?php if (count($comments) > 0) : ?>
             <p class="comment-quantity">This post has <?php echo $quantity ?> comment<?php if (count($comments) > 1) : echo 's';
-                                                                                    endif; ?>.</p>
-
+                                                                                        endif; ?>.</p>
             <?php foreach ($comments as $comment) : ?>
+
                 <div class="row comments">
                     <div class="col-1">
                         <a href="/blog/profile.php?userId=<?php echo $comment['user_id']; ?>" class="comment-author"><?php echo $comment['username']; ?></a>
                         <img class="comment-img" src="<?php echo $comment['image'] ?>" alt="user">
                     </div>
                     <div class="col-4">
-                        <p class="comment-content"><?php echo $comment['content'] ?></p>
-
+                        <p class="comment-content"><?php echo $comment['content'] ?>
+                        <?php if ($_SESSION['userId'] == $comment['user_id']) : ?>
+                            <a href="/blog/includes/delete-comment.php?id=<?php echo $comment['id']; ?>&postId=<?php echo $id; ?>"><i class="far fa-trash-alt"></i></a>
+                        <?php endif; ?>
+                        </p>
                     </div>
-
-
                 </div>
-
             <?php endforeach; ?>
         <?php endif ?>
-
-
     </div>
-
-
 </div>
 </main>
 

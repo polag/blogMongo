@@ -27,7 +27,7 @@ if (isset($_GET['stato'])) {
         </div>
         <div class="mb-3">
             <label for="image" class="form-label">Image</label>
-            <input type="text" name="image" value="https://" class="form-control" autocomplete="off" required>
+            <input type="text" name="image" placeholder="https://" class="form-control" autocomplete="off">
         </div>
         <div class="mb-3">
             <label for="publish" class="form-label">Publish</label>

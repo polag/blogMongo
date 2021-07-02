@@ -65,5 +65,32 @@ class Comment{
     }
 
 
+    public static function deleteComment($id, $loggedInUserId, $postId)
+    {
+        global $mysqli;
+        $id = intval($id);
+        $loggedInUserId = intval($loggedInUserId);
+        $postId = intval($postId);
+       
+        $query = $mysqli->prepare('DELETE FROM comment WHERE id = ? AND user_id = ? AND post_id= ?');
+        
+        $query->bind_param('iii', $id,$loggedInUserId,$postId);
+        $query->execute();
+
+        if ($query->affected_rows === 0) {
+            error_log('Errore MySQL: ' . $query->error_list[0]['error']);
+            header('Location: https://localhost/blog/post-view.php?stato=ko');
+            exit;
+        }
+
+
+        header('Location: https://localhost/blog/post-view.php?stato=ok&comment=1&id='.$postId);
+        exit;
+
+
+
+    }
+
+
     
 }

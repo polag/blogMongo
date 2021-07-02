@@ -28,7 +28,9 @@ if (isset($_GET['stato'])) {
     <?php foreach ($posts as $post) : ?>
         <div class="col-lg-6 col-md-6 col-sm-12">
         <div class="card manage-post">
+        <?php if ($post['image'] != null) :  ?>
             <img class="post-img-manage" src="<?php echo $post['image'] ?>" alt="post">
+            <?php endif;?>
             <div class="card-body">
                 <h2 class="post-title"><?php echo $post['title'] ?></h2>
                 <p class="post-summary"><?php echo $post['summary'] ?></p>
