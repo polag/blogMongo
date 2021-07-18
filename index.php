@@ -13,21 +13,21 @@ if (count($posts) > 0) :
             <?php foreach ($posts as $post) : ?>
                 <div class="col-lg-4 col-md-6 col-sm-12">
                     <?php if (isset($_SESSION['userId'])) : 
-                        if ($_SESSION['userId'] == $post['author_id']) : ?>
-                            <a href="/blog/post-view.php?id=<?php echo $post['id'] ?>&comment=0">
+                        if ($_SESSION['userId'] == (string)$post['_id']) : ?>
+                            <a href="/blogMongo/post-view.php?id=<?php echo $post['id'] ?>&comment=0">
                             <?php else : ?>
-                            <a href="/blog/post-view.php?id=<?php echo $post['id'] ?>&comment=1">
+                            <a href="/blogMongo/post-view.php?id=<?php echo $post['id'] ?>&comment=1">
                             <?php endif; ?>
                         <?php else : ?>
-                            <a href="/blog/post-view.php?id=<?php echo $post['id'] ?>&comment=1">
+                            <a href="/blogMongo/post-view.php?id=<?php echo $post['id'] ?>&comment=1">
                             <?php endif; ?>
                             <div class="card post-card">
                             <?php if ($post['image'] != null) :  ?>
                                 <img class="preview-img" src="<?php echo $post['image'] ?>" alt="post">
                                 <?php endif;?>
                                 <div class="card-body">
-                                    <p><?php echo date('d M Y', strtotime($post['created_at'])) ?></p>
-                                    <h2 class="post-title"><?php echo $post['title'] ?></h2>
+<!--                                     <p><?php echo date('d M Y', strtotime($post['created_at'])) ?></p>
+ -->                                    <h2 class="post-title"><?php echo $post['title'] ?></h2>
                                     <h3 class="post-author">By <?php echo $post['username'] ?></h3>
                                     <p class="post-summary"><?php echo $post['summary'] ?></p>
                                 </div>
@@ -40,7 +40,7 @@ if (count($posts) > 0) :
     </div>
 <?php else : ?>
 
-    <p>There aren't any posts yet. Do you wish to <a href="/blog/create-post.php">create one?</a></p>
+    <p>There aren't any posts yet. Do you wish to <a href="/blogMongo/create-post.php">create one?</a></p>
 
 
 <?php endif; ?>

@@ -1,0 +1,52 @@
+$jsonSchema: {
+  bsonType: "object",
+  required: [ "nome", "cognome", "telefono", "email","compleanno","indirizzo" ],
+  properties: {
+  nome: {
+    bsonType: "string",
+    description: "deve essere una stringa, required"
+    },
+            cognome: {
+              bsonType: "string",
+               description: "deve essere una stringa, required"
+            },
+            telefono: {
+              bsonType: "string",
+               description: "deve essere una stringa, required"
+            },
+            email: {
+              bsonType: "string",
+              description: "deve essere una stringa, required"
+            },
+            compleanno:{
+              bsonType: "string",
+              description: "deve essere una stringa, required"
+            },
+            indirizzo: {
+               bsonType: "object",
+               required: [ "via", "cap","citta","regione","stato" ],
+               properties: {
+                  via: {
+                     bsonType: "string",
+                     description: "deve essere una stringa, required"
+                  },
+                  cap: {
+                     bsonType: "string",
+                     description: "deve essere una stringa, required"
+                  },
+                  citta: {
+                     bsonType: "string",
+                     description: "deve essere una stringa, required"
+                  },
+                  regione: {
+                     bsonType: "string",
+                     description: "deve essere una stringa, required"
+                  },
+                  stato: {
+                     bsonType: "string",
+                     description: "deve essere una stringa, required"
+                  }
+               }
+            }
+         }
+      }

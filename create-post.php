@@ -12,7 +12,7 @@ if (isset($_GET['stato'])) {
 ?>
 <div class="post-create">
     <h2>Create new post</h2>
-    <form action="/blog/includes/create-post.php" method="POST" >
+    <form action="/blogMongo/includes/create-post.php" method="POST" >
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
             <input type="text" name="title" class="form-control" autocomplete="off" required>

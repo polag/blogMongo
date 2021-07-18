@@ -4,16 +4,20 @@ namespace DataHandle;
 
 require_once __DIR__ . '/db.php';
 
+use DateTime;
 use Mysqli;
 use Exception;
+use MongoDB;
 
 class Posts extends FormHandle
 {
     public static function createPost($form_data, $loggedInUserId)
+    //public static function createPost($form_data)
     {
+        $date_time = date('Y-m-d');
         if (isset($form_data['publish'])) {
             $publish = 1;
-            $published_date = date('Y-m-d');
+            $published_date = $date_time;
         } else {
             $publish = 0;
             $published_date = null;
@@ -25,61 +29,115 @@ class Posts extends FormHandle
             'summary'       => $form_data['summary'],
             'image'          => $form_data['image']
 
+
         );
 
 
         if ($fields) {
-            global $mysqli;
 
-            $query = $mysqli->prepare('INSERT INTO post(title, content, summary, image, published_at, published,  author_id) VALUES (?, ?, ?, ?,?, ?,?)');
+            global $client;
+            $collection = $client->blog->post;
 
-            $query->bind_param('sssssii', $fields['title'], $fields['content'], $fields['summary'], $fields['image'], $published_date, $publish, $loggedInUserId);
-            $query->execute();
+            $new_post = $collection->insertOne(array(
+                'title' => $fields['title'],
+                'content' => $fields['content'],
+                'summary' => $fields['summary'],
+                'image' => $fields['image'],
+                'published_at' => $published_date,
+                'published' => $publish,
+                'creation_date' => $date_time
 
+                // 'author_id' => $loggedInUserId
 
-            if ($query->affected_rows === 0) {
-                error_log('Errore MySQL: ' . $query->error_list[0]['error']);
-                header('Location: https://localhost/blog/create-post.php?stato=ko');
+            ));
+
+            if ($new_post->getInsertedCount() === 0) {
+                error_log('Errore MongoDB ');
+                header('Location: https://localhost/blogMongo/create-post.php?stato=ko');
+                exit;
+            }
+
+            $post_id = (string)$new_post->getInsertedId();
+            $collection_user = $client->blog->user;
+            $new_post_user = $collection_user->updateOne(
+                array('_id' => new MongoDB\BSON\ObjectId($loggedInUserId)),
+                array('$push' => ['posts_id' => $post_id])
+            );
+
+            if ($new_post_user->getModifiedCount() === 0) {
+                error_log('Errore MongoDB ');
+                header('Location: https://localhost/blogMongo/create-post.php?stato=ko');
                 exit;
             }
 
 
-            header('Location: https://localhost/blog/create-post.php?stato=ok');
+            header('Location: https://localhost/blogMongo/create-post.php?stato=ok');
             exit;
         }
     }
 
     public static function selectPost($id = null, $userId = null)
     {
-
-        global $mysqli;
+        global $client;
+        $collection = $client->blog->post;
+        $collection_user = $client->blog->user;
+        $results = array();
 
         if ($id and !$userId) {
-            $query = $mysqli->query('SELECT title, content, summary, post.image, created_at, username, user.image as avatar, user.bio
-                FROM post JOIN user ON post.author_id = user.id WHERE post.id =' . $id);
-            $results = $query->fetch_assoc();
+            $post = $collection->findOne(array(
+                '_id' => new MongoDB\BSON\ObjectId($id)
+            ));
+            $author = $collection_user->findOne(['posts_id' => $id]);
+            $post = iterator_to_array($post);
+            $post['id'] = $id;
+            $author = iterator_to_array($author);
+
+            $results = array_merge($post, $author);
         } elseif ($userId and !$id) {
-            $query = $mysqli->query('SELECT post.id, title, content, summary, post.image,  created_at,updated_at, published_at, username, published 
-            FROM post JOIN user ON post.author_id = user.id WHERE user.id =' . $userId);
-            $results = array();
+            $author = $collection_user->find(array(
+                '_id' => new MongoDB\BSON\ObjectId($userId)
+            ));
+            $author = iterator_to_array($author);
+            $author = iterator_to_array($author[0]);
+            $posts_id = iterator_to_array($author['posts_id']);
+            $count = count($posts_id);
+            $results[0] = $author;
+            for ($i = 1; $i <= $count; $i++) {
+                $post = $collection->findOne(array(
+                    '_id' => new MongoDB\BSON\ObjectId($posts_id[$i - 1])
+                ));
+                if (isset($post)) {
+                    $post = iterator_to_array($post);
 
-            while ($row = $query->fetch_assoc()) {
-
-                $results[] = $row;
+                    $post['id'] = $posts_id[$i - 1];
+                    $results[$i] = $post;
+                }
             }
-        } elseif ($userId and $id) {
-            $query = $mysqli->query('SELECT title, content, summary, post.image, published, created_at,updated_at, published_at, username 
-            FROM post JOIN user ON post.author_id = user.id WHERE user.id =' . $userId . ' AND post.id = ' . $id);
-            $results = $query->fetch_assoc();
+        } elseif ($userId and $id) { //findOne
+            $post = $collection->findOne(array(
+                '_id' => new MongoDB\BSON\ObjectId($id)
+            ));
+            $author = $collection_user->findOne(['posts_id' => $id]);
+            $post = iterator_to_array($post);
+            $post['id'] = $id;
+            $author = iterator_to_array($author);
+
+            $results = array_merge($post, $author);
         } else {
-            $query = $mysqli->query('SELECT post.id, title, content, summary, post.image, created_at, username, post.author_id 
-                FROM post JOIN user ON post.author_id = user.id WHERE published = 1');
 
 
-            $results = array();
+            $posts = $collection->find(array('published' => 1));
 
-            while ($row = $query->fetch_assoc()) {
-                $results[] = $row;
+            if (isset($posts)) {
+                foreach ($posts as $post) {
+                    $id = (string)new MongoDB\BSON\ObjectId($post['_id']);
+
+                    $author = $collection_user->findOne(['posts_id' => $id]);
+                    $post = iterator_to_array($post);
+                    $post['id'] = $id;
+                    $author = iterator_to_array($author);
+                    $results[] = array_merge($post, $author);
+                }
             }
         }
         return $results;
@@ -87,7 +145,6 @@ class Posts extends FormHandle
 
     public static function updatePost($form_data, $id, $userId)
     {
-
         $fields = array(
             'title'          => $form_data['title'],
             'content'       => $form_data['content'],
@@ -97,120 +154,126 @@ class Posts extends FormHandle
         );
 
         if ($fields) {
-            global $mysqli;
 
-            $id          = intval($id);
             $is_in_error = false;
 
+            global $client;
+            $collection = $client->blog->post;
+
             try {
-                $query = $mysqli->prepare('UPDATE post SET title = ?, content = ?, summary = ?, image = ? WHERE id = ? AND author_id = ? ');
-                if (is_bool($query)) {
-                    $is_in_error = true;
-                    throw new Exception('Query non valida. $mysqli->prepare ha restituito false.');
-                }
-                $query->bind_param('ssssii', $fields['title'], $fields['content'], $fields['summary'], $fields['image'], $id, $userId);
-                $query->execute();
+
+                $update_post = $collection->updateOne(
+                    array('_id' => new MongoDB\BSON\ObjectId($id)),
+                    array(
+                        '$set' => [
+                            'title' => $fields['title'],
+                            'content' => $fields['content'],
+                            'summary' => $fields['summary'],
+                            'image' => $fields['image'],
+                        ]
+                    )
+                );
             } catch (Exception $e) {
                 error_log("Errore PHP in linea {$e->getLine()}: " . $e->getMessage() . "\n", 3, 'my-errors.log');
             }
 
-            if (!is_bool($query)) {
-                if (count($query->error_list) > 0) {
-                    $is_in_error = true;
-                    foreach ($query->error_list as $error) {
-                        error_log("Errore MySQL n. {$error['errno']}: {$error['error']} \n", 3, 'my-errors.log');
-                    }
-                    header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=ko');
-                    exit;
-                }
-            }
 
-            $stato = $is_in_error ? 'ko' : 'ok';
-            header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=' . $stato . '&update=1');
-            exit;
-        }
-    }
-    public static function deletePost($userId, $id = null)
-    {
-        global $mysqli;
+            if ($update_post->getModifiedCount() == 0) {
 
-        $is_in_error = false;
-
-        if ($id) {
-            $id = intval($id);
-            try {
-                $query = $mysqli->prepare('DELETE FROM post WHERE id = ? AND author_id = ?');
-
-                if (is_bool($query)) {
-                    $is_in_error = true;
-                    throw new Exception('Query non valida. $mysqli->prepare ha restituito false.');
-                }
-                $query->bind_param('ii', $id, $userId);
-                $query->execute();
-            } catch (Exception $e) {
-                error_log("Errore PHP in linea {$e->getLine()}: " . $e->getMessage() . "\n", 3, 'my-errors.log');
-            }
-
-            if (!is_bool($query)) {
-                if (count($query->error_list) > 0) {
-                    $is_in_error = true;
-                    foreach ($query->error_list as $error) {
-                        error_log("Errore MySQL n. {$error['errno']}: {$error['error']} \n", 3, 'my-errors.log');
-                    }
-                    header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=ko');
-                    exit;
-                }
-            }
-            $stato = $is_in_error ? 'ko' : 'ok';
-            header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=' . $stato . '&delete=1');
-            exit;
-        } else {
-            try {
-                $query = $mysqli->prepare('DELETE FROM post WHERE author_id = ?');
-                if (is_bool($query)) {
-                    $is_in_error = true;
-                    throw new Exception('Query non valida. $mysqli->prepare ha restituito false.');
-                }
-
-                $query->bind_param('i', $userId);
-                $query->execute();
-            } catch (Exception $e) {
-                error_log("Errore PHP in linea {$e->getLine()}: " . $e->getMessage() . "\n", 3, 'my-errors.log');
-            }
-
-            if (count($query->error_list) > 0) {
                 $is_in_error = true;
-                foreach ($query->error_list as $error) {
-                    error_log("Errore MySQL n. {$error['errno']}: {$error['error']} \n", 3, 'my-errors.log');
-                }
-                header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=ko');
+
+                header('Location: https://localhost/blogMongo/manage-post.php?id=' . $id . '&stato=ko');
                 exit;
             }
 
 
             $stato = $is_in_error ? 'ko' : 'ok';
-            header('Location: https://localhost/blog/manage-post.php?id=' . $id . '&stato=' . $stato . '&delete=1');
+            header('Location: https://localhost/blogMongo/manage-post.php?id=' . $id . '&stato=' . $stato . '&update=1');
+            exit;
+        }
+    }
+    public static function deletePost($userId, $id = null)
+    {
+
+
+
+        global $client;
+        $collection = $client->blog->post;
+        $collection_user = $client->blog->user;
+
+
+        $is_in_error = false;
+
+        if ($id) {
+
+            try {
+                $risultatoCancellazione = $collection->deleteOne(array('_id' => new MongoDB\BSON\ObjectId($id)));
+
+                if ($risultatoCancellazione->getDeletedCount() == 0) {
+                    $is_in_error = true;
+                    throw new Exception('Query non valida.');
+                }
+                $risultatoCancellazione = $collection_user->updateOne(
+                    array('_id' => new MongoDB\BSON\ObjectId($userId)),
+                    array('$pull' => [
+                        'posts_id' => $id
+                    ])
+                );
+            } catch (Exception $e) {
+                error_log("Errore PHP in linea {$e->getLine()}: " . $e->getMessage() . "\n", 3, 'my-errors.log');
+            }
+
+
+            $stato = $is_in_error ? 'ko' : 'ok';
+            header('Location: https://localhost/blogMongo/manage-post.php?id=' . $id . '&stato=' . $stato . '&delete=1');
+            exit;
+        } else {
+            try {
+                $author = $collection_user->find(array(
+                    '_id' => new MongoDB\BSON\ObjectId($userId)
+                ));
+                $author = iterator_to_array($author);
+                $author = iterator_to_array($author[0]);
+                $posts_id = iterator_to_array($author['posts_id']);
+                $count = count($posts_id);
+
+                for ($i = 0; $i < $count; $i++) {
+                    $risultatoCancellazione = $collection->deleteOne(
+                        array('_id' => new MongoDB\BSON\ObjectId($posts_id[$i]))
+                    );
+                    if ($risultatoCancellazione->getDeletedCount() == 0) {
+                        $is_in_error = true;
+                        throw new Exception('Query non valida.');
+                    }
+                }
+
+                $user_deleteIds = $collection_user->updateOne(
+                    array('_id' => new MongoDB\BSON\ObjectId($userId)),
+                    array('$unset' => [
+                        'posts_id' => ''
+                    ])
+                );
+            } catch (Exception $e) {
+                error_log("Errore PHP in linea {$e->getLine()}: " . $e->getMessage() . "\n", 3, 'my-errors.log');
+            }
+
+
+            $stato = $is_in_error ? 'ko' : 'ok';
+            header('Location: https://localhost/blogMongo/index.php?id=' . $id . '&stato=' . $stato . '&delete=1');
             exit;
         }
     }
     public static function publishPost($publish, $id, $userId)
     {
-        global $mysqli;
-        $publish          = intval($publish);
-        $id          = intval($id);
-        $userId          = intval($userId);
-        $query = $mysqli->prepare('UPDATE post SET published = ? WHERE id = ? AND author_id = ? ');
-        $query->bind_param('iii', $publish, $id, $userId);
-        $query->execute();
+        global $client;
+        $collection = $client->blog->post;
 
-        if ($query->affected_rows === 0) {
-            error_log('Errore MySQL: ' . $query->error_list[0]['error']);
-            header('Location: https://localhost/blog/manage-post.php?stato=ko');
-            exit;
-        }
+        $update_post = $collection->updateOne(
+            array('_id' => new MongoDB\BSON\ObjectId($id)),
+            array('$set' => ['published' => $publish])
+        );
 
-
-        header('Location: https://localhost/blog/manage-post.php?stato=ok&publish='.$publish);
+        header('Location: https://localhost/blogMongo/manage-post.php?stato=ok&publish=' . $publish);
         exit;
     }
 }

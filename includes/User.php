@@ -57,8 +57,8 @@ class User
         );
 
         $fields = self::sanitize($fields);
-         $avatarId = rand(1,50);
-        $image = 'https://robohash.org/'.$avatarId; 
+        $avatarId = rand(1,50);
+        $avatar = 'https://robohash.org/'.$avatarId; 
 
         if ($fields[0] instanceof Exception) {
             $error_messages = '';
@@ -68,45 +68,60 @@ class User
                     $error_messages .= '|';
                 }
             }
-            header('Location: https://localhost/blog/login.php?statoreg=errore&messages='
+            header('Location: https://localhost/blogMongo/login.php?statoreg=errore&messages='
                 . $error_messages);
             exit;
         }
         if ($fields['password'] !== $fields['password-check']) {
-            header('Location: https://localhost/blog/login?statoreg=errore&messages=Passwords are different');
+            header('Location: https://localhost/blogMongo/login?statoreg=errore&messages=Passwords are different');
             exit;
         }
 
-        global $mysqli;
+        global $client;
+        $collection = $client->blog->user;
+        
         //check if username already exists
-        $query_user = $mysqli->query("SELECT username FROM user WHERE username = '" . $fields['username'] . "'");
+        $username = $collection->findOne(array(
+            'username' => $fields['username'] 
+        ));
+           
 
-        if ($query_user->num_rows > 0) {
-            header('Location: https://localhost/blog/login.php?statoreg=errore&messages=Username already in use');
+        if ($username != null) {
+            header('Location: https://localhost/blogMongo/login.php?statoreg=errore&messages=Username already in use');
             exit;
         }
-        $query_user->close();
+        
         //check if email already registered
-        $query_email = $mysqli->query("SELECT email FROM user WHERE email = '" . $fields['email'] . "'");
-
-        if ($query_email->num_rows > 0) {
-            header('Location: https://localhost/blog/login.php?statoreg=errore&messages=Email already registered. Do you want to <a href="/blog/login.php"> LOG IN </a> instead?');
+        $email = $collection->findOne(array(
+            'email' => $fields['email'] 
+        ));
+        
+        
+        if ($email != null) {
+            header('Location: https://localhost/blogMongo/login.php?statoreg=errore&messages=Email already registered. Do you want to <a href="/blog/login.php"> LOG IN </a> instead?');
             exit;
         }
 
-        $query_email->close();
+        $new_user = $collection->insertOne(array(
+            'username'=>$fields['username'],
+            'firstname' =>$fields['firstname'],
+            'lastname' => $fields['lastname'],
+            'email'=>$fields['email'],
+            'phone' =>$fields['phone'],
+            'password' => md5($fields['password']),
+            'avatar' => $avatar,
+            'posts_id'=>array()
+        ));
 
-        $query = $mysqli->prepare('INSERT INTO user(username, firstname, lastname, email, phone, password, image) VALUES (?, ?,?,?,?,MD5(?),?)');
-        $query->bind_param('sssssss', $fields['username'], $fields['firstname'], $fields['lastname'], $fields['email'], $fields['phone'], $fields['password'],$image);
-        $query->execute();
+    
 
-        if ($query->affected_rows === 0) {
-            error_log('Error MySQL: ' . $query->error_list[0]['error']);
-            header('Location: https://localhost/blog/login.php?statoreg=ko');
+        if ($new_user->getInsertedCount() === 0) {
+            error_log('Error MongoDB');
+            header('Location: https://localhost/blogMongo/login.php?statoreg=ko');
             exit;
         }
 
-        header('Location: https://localhost/blog/login.php?statoreg=ok');
+        header('Location: https://localhost/blogMongo/login.php?statoreg=ok');
         exit;
     }
 
@@ -120,23 +135,27 @@ class User
 
 
 
-        global $mysqli;
+        global $client;
+        $collection = $client->blog->user;
 
-        $query_user = $mysqli->query("SELECT * FROM user WHERE username = '" . $fields['username'] . "'");
-        if ($query_user->num_rows === 0) {
-            header("Location: https://localhost/blog/login.php?statologin=errore&messages=User doesn't exist");
+        $user = $collection->findOne(array(
+            'username' => $fields['username'] 
+        ));
+
+        if ($user == null) {
+            header("Location: https://localhost/blogMongo/login.php?statologin=errore&messages=User doesn't exist");
             exit;
         }
 
-        $user = $query_user->fetch_assoc();
+        
 
         if ($user['password'] !== md5($fields['password'])) {
-            header('Location: https://localhost/blog/login.php?statologin=errore&messages=Wrong password');
+            header('Location: https://localhost/blogMongo/login.php?statologin=errore&messages=Wrong password');
             exit;
         }
 
         return array(
-            'id'  => $user['id'],
+            'id'  => (string)$user['_id'],
             'username' => $user['username']
         );
     }

@@ -1,0 +1,7 @@
+{
+    "require": {
+        "monolog/monolog": "2.3.*",
+        "csanquer/pdo-service-provider": "~1.1dev",
+        "mongodb/mongodb": "^1.8"
+    }
+}

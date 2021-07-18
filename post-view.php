@@ -5,8 +5,8 @@ $id = $_GET['id'];
 $comment = $_GET['comment'];
 $post = \DataHandle\Posts::selectPost($id);
 $comments = array();
-$comments = \DataHandle\Comment::selectComments($id);
-$quantity = \DataHandle\Comment::countComments($id)['quantity'];
+//$comments = \DataHandle\Comment::selectComments($id);
+//$quantity = \DataHandle\Comment::countComments($id)['quantity'];
 ?>
 
 <div class="post-container">
@@ -25,7 +25,7 @@ $quantity = \DataHandle\Comment::countComments($id)['quantity'];
             <?php endif; ?>
 
         </div>
-        <p class="post-date">Created on: <?php echo date('d M Y', strtotime($post['created_at'])) ?></p>
+        <p class="post-date">Created on: <?php echo date('d M Y', strtotime($post['creation_date'])) ?></p>
 
 
 
@@ -37,8 +37,9 @@ $quantity = \DataHandle\Comment::countComments($id)['quantity'];
                 <div class="col-lg-8 col-md-8 col-sm-12">
                     <div class="card-body">
                         <h4 class="post-author">Author: <?php echo $post['username'] ?></h4>
+                        <?php if (isset($post['bio'])) :  ?>
                         <p class="card-text"><?php echo $post['bio']; ?></p>
-
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -65,7 +66,7 @@ $quantity = \DataHandle\Comment::countComments($id)['quantity'];
                 <div class="row comments">
                     <div class="col-1">
                         <a href="/blog/profile.php?userId=<?php echo $comment['user_id']; ?>" class="comment-author"><?php echo $comment['username']; ?></a>
-                        <img class="comment-img" src="<?php echo $comment['image'] ?>" alt="user">
+                        <img class="comment-img" src="<?php echo $comment['avatar'] ?>" alt="user">
                     </div>
                     <div class="col-4">
                         <p class="comment-content"><?php echo $comment['content'] ?>

@@ -15,7 +15,7 @@ session_start();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous">
     </script>
     <!--  CSS -->
-    <link rel="stylesheet" href="/blog/styles/styles.css" />
+    <link rel="stylesheet" href="/blogMongo/styles/styles.css" />
     <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/402cc49e6e.js" crossorigin="anonymous"></script>
     <title>Blog</title>
@@ -32,7 +32,7 @@ session_start();
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="/blog/index.php">Home</a>
+                            <a class="nav-link active" aria-current="page" href="/blogMongo/index.php">Home</a>
                         </li>
 
 
@@ -42,21 +42,21 @@ session_start();
                                 <?php echo strtoupper($_SESSION['username'])  ?>
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="/blog/profile.php">Profile</a></li>
-                                <li><a class="dropdown-item" href="/blog/manage-post.php">Manage posts</a></li><!-- Vista para ver, editar y eliminar posts -->
-                                <li><a class="dropdown-item" href="/blog/create-post.php">Create new post</a></li>
+                            <li><a class="dropdown-item" href="/blogMongo/profile.php">Profile</a></li>
+                                <li><a class="dropdown-item" href="/blogMongo/manage-post.php">Manage posts</a></li><!-- Vista para ver, editar y eliminar posts -->
+                                <li><a class="dropdown-item" href="/blogMongo/create-post.php">Create new post</a></li>
 
-                                <li><a class="dropdown-item" href="/blog/includes/login.php?logout=1">Log out</a></li>
+                                <li><a class="dropdown-item" href="/blogMongo/includes/login.php?logout=1">Log out</a></li>
                             </ul>
 
 
                            
                         <?php else : ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="/blog/login.php">Log In</a>
+                                <a class="nav-link" href="/blogMongo/login.php">Log In</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/blog/login.php">Sign Up</a>
+                                <a class="nav-link" href="/blogMongo/login.php">Sign Up</a>
                             </li>
                         <?php endif ?>
 

@@ -1,8 +1,10 @@
 <?php
+require_once __DIR__.'/../vendor/autoload.php';
 
-$mysqli = new mysqli('localhost', 'root', '', 'blog');
+ $client = new MongoDB\Client(
 
-if ($mysqli->connect_errno) {
-    echo 'Connessione al database fallita: ' . $mysqli->connect_error;
-    exit();
-}
+    
+    //"mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb"
+   "mongodb+srv://paula:luna12182@cluster0.bsigg.mongodb.net/todo?retryWrites=true&w=majority"
+   
+);
